@@ -7,20 +7,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 
-try:
-    from flash_attn import flash_attn_with_kvcache
-except ImportError:
-    flash_attn_with_kvcache = None
-
-try:
-    from flash_attn.layers.rotary import RotaryEmbedding
-except ImportError:
-    RotaryEmbedding = None
-
-try:
-    from causal_conv1d import causal_conv1d_fn, causal_conv1d_update
-except ImportError:
-    causal_conv1d_fn, causal_conv1d_update = None, None
+flash_attn_with_kvcache = None
+RotaryEmbedding = None
+causal_conv1d_fn, causal_conv1d_update = None, None
 
 
 def _update_kv_cache(kv, inference_params, layer_idx):
