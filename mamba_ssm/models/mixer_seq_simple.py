@@ -13,17 +13,13 @@ import torch.nn as nn
 
 from mamba_ssm.models.config_mamba import MambaConfig
 from mamba_ssm.modules.mamba_simple import Mamba
-from mamba_ssm.modules.mamba2 import Mamba2
 from mamba_ssm.modules.mha import MHA
 from mamba_ssm.modules.mlp import GatedMLP
 from mamba_ssm.modules.block import Block
 from mamba_ssm.utils.generation import GenerationMixin
 from mamba_ssm.utils.hf import load_config_hf, load_state_dict_hf
 
-try:
-    from mamba_ssm.ops.triton.layer_norm import RMSNorm, layer_norm_fn, rms_norm_fn
-except ImportError:
-    RMSNorm, layer_norm_fn, rms_norm_fn = None, None, None
+from mamba_ssm.ops.layernorm import RMSNorm, layer_norm_fn, rms_norm_fn
 
 
 def create_block(
@@ -51,10 +47,10 @@ def create_block(
         # Create a copy of the config to modify
         ssm_cfg = copy.deepcopy(ssm_cfg) if ssm_cfg is not None else {}
         ssm_layer = ssm_cfg.pop("layer", "Mamba1")
-        if ssm_layer not in ["Mamba1", "Mamba2"]:
-            raise ValueError(f"Invalid ssm_layer: {ssm_layer}, only support Mamba1 and Mamba2")
+        if ssm_layer not in ["Mamba1",]:
+            raise ValueError(f"Invalid ssm_layer: {ssm_layer}, only support Mamba1")
         mixer_cls = partial(
-            Mamba2 if ssm_layer == "Mamba2" else Mamba,
+            Mamba,
             layer_idx=layer_idx,
             **ssm_cfg,
             **factory_kwargs
@@ -145,9 +141,6 @@ class MixerModel(nn.Module):
         # the main branch (output of MLP / Mixer). The model definition is unchanged.
         # This is for performance reason: we can fuse add + layer_norm.
         self.fused_add_norm = fused_add_norm
-        if self.fused_add_norm:
-            if layer_norm_fn is None or rms_norm_fn is None:
-                raise ImportError("Failed to import Triton LayerNorm / RMSNorm kernels")
 
         self.layers = nn.ModuleList(
             [
@@ -205,9 +198,7 @@ class MixerModel(nn.Module):
                 self.norm_f.bias,
                 eps=self.norm_f.eps,
                 residual=residual,
-                prenorm=False,
-                residual_in_fp32=self.residual_in_fp32,
-                is_rms_norm=isinstance(self.norm_f, RMSNorm)
+                prenorm=False
             )
         return hidden_states
 

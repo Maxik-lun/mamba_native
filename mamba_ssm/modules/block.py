@@ -4,7 +4,7 @@ from typing import Optional
 import torch
 from torch import nn, Tensor
 
-from mamba_ssm.ops.triton.layer_norm import RMSNorm, layer_norm_fn
+from mamba_ssm.ops.layernorm import RMSNorm, layer_norm_fn, rms_norm_fn
 
 
 class Block(nn.Module):
@@ -60,9 +60,7 @@ class Block(nn.Module):
                 self.norm.bias,
                 residual=residual,
                 prenorm=True,
-                residual_in_fp32=self.residual_in_fp32,
                 eps=self.norm.eps,
-                is_rms_norm=isinstance(self.norm, RMSNorm)
             )
         hidden_states = self.mixer(hidden_states, inference_params=inference_params, **mixer_kwargs)
 
@@ -79,9 +77,7 @@ class Block(nn.Module):
                     self.norm2.bias,
                     residual=residual,
                     prenorm=True,
-                    residual_in_fp32=self.residual_in_fp32,
                     eps=self.norm2.eps,
-                    is_rms_norm=isinstance(self.norm2, RMSNorm)
                 )
             hidden_states = self.mlp(hidden_states)
 
