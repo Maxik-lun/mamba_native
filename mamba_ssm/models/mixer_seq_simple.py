@@ -11,15 +11,15 @@ from collections import namedtuple
 import torch
 import torch.nn as nn
 
-from mamba_ssm.models.config_mamba import MambaConfig
-from mamba_ssm.modules.mamba_simple import Mamba
-from mamba_ssm.modules.mha import MHA
-from mamba_ssm.modules.mlp import GatedMLP
-from mamba_ssm.modules.block import Block
-from mamba_ssm.utils.generation import GenerationMixin
-from mamba_ssm.utils.hf import load_config_hf, load_state_dict_hf
+from ..models.config_mamba import MambaConfig
+from ..modules.mamba_simple import Mamba
+from ..modules.mha import MHA
+from ..modules.mlp import GatedMLP
+from ..modules.block import Block
+from ..utils.generation import GenerationMixin
+from ..utils.hf import load_config_hf, load_state_dict_hf
 
-from mamba_ssm.ops.layernorm import RMSNorm, layer_norm_fn, rms_norm_fn
+from ..ops.layernorm import RMSNorm, layer_norm_fn, rms_norm_fn
 
 
 def create_block(

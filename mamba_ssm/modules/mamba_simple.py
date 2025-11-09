@@ -10,7 +10,7 @@ from torch import Tensor
 
 from einops import rearrange, repeat
 
-from mamba_ssm.ops.selective_scan_interface import selective_scan
+from ..ops.selective_scan_interface import selective_scan
 
 causal_conv1d_fn, causal_conv1d_update = None, None
 selective_state_update = None
